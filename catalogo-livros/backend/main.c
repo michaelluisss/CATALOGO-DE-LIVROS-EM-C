@@ -1,50 +1,71 @@
 #include <stdio.h>
+#include <string.h>
+
 #include "ordenacao.h"
 
-#define MAX_LIVROS 5
+static void mostrarMenu(void) {
+    printf("\nEscolha uma opção de ordenação:\n");
+    printf("1. Ordenar por nome (crescente)\n");
+    printf("2. Ordenar por nome (decrescente)\n");
+    printf("3. Ordenar por valor (crescente)\n");
+    printf("4. Ordenar por valor (decrescente)\n");
+    printf("5. Sair\n");
+}
 
-int main( ) {
-    Livro livros[MAX_LIVROS] = {
-        {"O Pequeno Principe", 29.90},
-        {"Dom Casmurro", 39.90},
-        {"A Arte da Guerra", 25.50},
-        {"1984", 34.00},
-        {"Memorias Postumas de Bras Cubas", 42.75},
-        {"Cronicas de um Babaca", 189.00},
-        {"O diario de um banana", 50.50}
-    };
+int main(int argc, char *argv[]) {
+    Livro livros[MAX_LIVROS];
+    int quantidade = 0;
+    int criterio = 0;
+    int crescente = 1;
 
+    if (argc >= 3) {
+        criterio = interpretarCritero(argv[1]);
+        crescente = interpretarDirecao(argv[2]);
+
+        if (criterio == 0) {
+            fprintf(stderr, "Uso: %s <nome|preco> <crescente|decrescente> [--stdin]\n", argv[0]);
+            return 1;
+        }
+
+        if (argc >= 4 && strcmp(argv[3], "--stdin") == 0) {
+            if (lerLivrosPorStdin(livros, &quantidade) == 0) {
+                fprintf(stderr, "Nenhum livro recebido via stdin.\n");
+                return 1;
+            }
+        } else {
+            carregarLivrosPadrao(livros, &quantidade);
+        }
+
+        ordenar(livros, quantidade, criterio, crescente);
+        exibirLivrosJson(livros, quantidade);
+        return 0;
+    }
+
+    carregarLivrosPadrao(livros, &quantidade);
     printf("Catalogo original:\n");
-    exibirLivros(livros, MAX_LIVROS);
-    int opcao;
-    do{
+    exibirLivros(livros, quantidade);
 
-        
-        printf("\nEscolha uma opção de ordenação:\n");
-        printf("1. Ordenar por nome (crescente)\n");
-        printf("2. Ordenar por nome (decrescente)\n");
-        printf("3. Ordenar por valor (crescente)\n");
-        printf("4. Ordenar por valor (decrescente)\n");
-        printf("5. Sair\n");
-        
+    int opcao;
+    do {
+        mostrarMenu();
         scanf("%d", &opcao);
-        
+
         switch (opcao) {
             case 1:
-                ordenarPorNome(livros, MAX_LIVROS, 1);
-                exibirLivros(livros, MAX_LIVROS);
+                ordenarPorNome(livros, quantidade, 1);
+                exibirLivros(livros, quantidade);
                 break;
             case 2:
-                ordenarPorNome(livros, MAX_LIVROS, 0);
-                exibirLivros(livros, MAX_LIVROS);
+                ordenarPorNome(livros, quantidade, 0);
+                exibirLivros(livros, quantidade);
                 break;
             case 3:
-                ordenarPorValor(livros, MAX_LIVROS, 1);
-                exibirLivros(livros, MAX_LIVROS);
+                ordenarPorValor(livros, quantidade, 1);
+                exibirLivros(livros, quantidade);
                 break;
             case 4:
-                ordenarPorValor(livros, MAX_LIVROS, 0);
-                exibirLivros(livros, MAX_LIVROS);
+                ordenarPorValor(livros, quantidade, 0);
+                exibirLivros(livros, quantidade);
                 break;
             case 5:
                 printf("Saindo...\n");
@@ -52,7 +73,7 @@ int main( ) {
             default:
                 printf("Opção inválida.\n");
         }
-    }while(opcao != 5);
-    
+    } while (opcao != 5);
+
     return 0;
 }
